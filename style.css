@@ -1,1 +1,23 @@
+body {
+  background: black;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
 
+canvas {
+  border: 1px solid white;
+  margin-top: 20px;
+  background: black;
+}
+
+.controls {
+  margin-top: 20px;
+}
+
+label {
+  display: block;
+  margin: 10px;
+}
