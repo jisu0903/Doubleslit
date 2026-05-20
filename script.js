@@ -16,18 +16,20 @@ function drawPattern() {
 
   for (let x = 0; x < canvas.width; x++) {
 
-    // 중심 기준 위치
+    // 중심 기준 좌표
     const dx = x - canvas.width / 2;
 
-    // 간섭 밝기 계산
-    const intensity =
-      Math.cos(dx * slitDistance * 0.01 / wavelength) ** 2;
+    // 간섭 패턴 주기 조정
+    const phase =
+      dx * slitDistance * 0.05 / (wavelength / 100);
 
-    // 밝기 변환
+    // cos² 간섭 밝기
+    const intensity = Math.cos(phase) ** 2;
+
     const brightness = Math.floor(intensity * 255);
 
     ctx.fillStyle =
-      `rgb(${brightness},${brightness},${brightness})`;
+      `rgb(${brightness}, ${brightness}, ${brightness})`;
 
     ctx.fillRect(x, 0, 1, canvas.height);
   }
