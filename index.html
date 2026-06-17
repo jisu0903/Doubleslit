@@ -1,28 +1,234 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>Double Slit Simulator</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일본어 형용사 암기</title>
+
+<style>
+body{
+    margin:0;
+    font-family:sans-serif;
+    background:#f2f2f2;
+}
+
+.screen{
+    display:none;
+    height:100vh;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+}
+
+.active{
+    display:flex;
+}
+
+.menu-btn{
+    width:260px;
+    padding:18px;
+    margin:10px;
+    font-size:22px;
+    border:none;
+    border-radius:15px;
+    background:white;
+    box-shadow:0 4px 10px rgba(0,0,0,.15);
+}
+
+#card{
+    width:320px;
+    height:220px;
+    background:white;
+    border-radius:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,.2);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    text-align:center;
+    cursor:pointer;
+    padding:20px;
+}
+
+.question{
+    font-size:68px;
+    font-weight:bold;
+}
+
+.kana{
+    font-size:34px;
+    color:#1976d2;
+    font-weight:bold;
+}
+
+.meaning{
+    font-size:24px;
+    margin-top:12px;
+}
+
+.back-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    border:none;
+    border-radius:10px;
+    padding:10px 16px;
+    font-size:16px;
+}
+</style>
 </head>
+
 <body>
 
-  <h1>Double Slit Simulator</h1>
+<div id="menu" class="screen active">
+    <h1>📚 일본어 형용사 암기</h1>
 
-  <div class="controls">
-    <label>
-      Wavelength
-      <input type="range" id="wavelength" min="380" max="700" value="650">
-    </label>
+    <button class="menu-btn" onclick="startMode('i')">
+        이형용사 연습
+    </button>
 
-    <label>
-      Slit Distance
-      <input type="range" id="slitDistance" min="1" max="10" value="4">
-    </label>
-  </div>
+    <button class="menu-btn" onclick="startMode('na')">
+        나형용사 연습
+    </button>
 
-  <canvas id="canvas"></canvas>
+    <button class="menu-btn" onclick="startMode('all')">
+        모두 연습
+    </button>
+</div>
 
-  <script src="script.js"></script>
+<div id="study" class="screen">
+    <button class="back-btn" onclick="goMenu()">← 메뉴</button>
+    <div id="card"></div>
+</div>
+
+<script>
+
+const iWords = [
+
+["大","おおきい","크다"],
+["小","ちいさい","작다"],
+["高","たかい","높다, 비싸다"],
+["低","ひくい","낮다"],
+["安","やすい","싸다"],
+["新","あたらしい","새롭다"],
+["古","ふるい","오래되다, 낡다"],
+["悪","わるい","나쁘다, 미안하다"],
+["難","むずかしい","어렵다"],
+["遠","とおい","멀다"],
+["近","ちかい","가깝다"],
+["長","ながい","길다"],
+["短","みじかい","짧다"],
+["熱","あつい","뜨겁다"],
+["冷","つめたい","차갑다"],
+["厚","あつい","두껍다"],
+["暑","あつい","덥다"],
+["寒","さむい","춥다"],
+["明","あかるい","밝다"],
+["暗","くらい","어둡다"],
+["多","おおい","많다"],
+["少","すくない","적다"],
+["遅","おそい","늦다, 느리다"],
+["早","はやい","이르다"],
+["速","はやい","빠르다"],
+["重","おもい","무겁다"],
+["軽","かるい","가볍다"],
+["広","ひろい","넓다"],
+["強","つよい","강하다"],
+["弱","よわい","약하다"]
+
+];
+
+const naWords = [
+
+["元気","げんきだ","건강하다"],
+["有名","ゆうめいだ","유명하다"],
+["大丈夫","だいじょうぶだ","괜찮다"],
+["大切","たいせつだ","소중하다"],
+["上手","じょうずだ","잘하다, 능숙하다"],
+["下手","へただ","못하다, 서투르다"],
+["得意","とくいだ","잘하다, 자신있다"],
+["苦手","にがてだ","못하다, 자신없다"],
+["簡単","かんたんだ","간단하다"],
+["賑やか","にぎやかだ","번화하다, 복적이다"],
+["便利","べんりだ","편리하다"],
+["不便","ふべんだ","불편하다"],
+["十分","じゅうぶんだ","충분하다"],
+["大変","たいへんだ","힘들다, 큰일이다"],
+["親切","しんせつだ","친절하다"],
+["同じ","おなじだ","같다"],
+["幸せ","しあわせだ","행복하다"]
+
+];
+
+let currentSet = [];
+let currentWord;
+let showingAnswer = false;
+
+const card = document.getElementById("card");
+
+function startMode(mode){
+
+    document.getElementById("menu").classList.remove("active");
+    document.getElementById("study").classList.add("active");
+
+    if(mode==="i"){
+        currentSet = iWords;
+    }
+    else if(mode==="na"){
+        currentSet = naWords;
+    }
+    else{
+        currentSet = [...iWords, ...naWords];
+    }
+
+    showQuestion();
+}
+
+function goMenu(){
+
+    document.getElementById("study").classList.remove("active");
+    document.getElementById("menu").classList.add("active");
+}
+
+function randomWord(){
+    return currentSet[
+        Math.floor(Math.random()*currentSet.length)
+    ];
+}
+
+function showQuestion(){
+
+    currentWord = randomWord();
+
+    card.innerHTML =
+    `<div class="question">${currentWord[0]}</div>`;
+
+    showingAnswer = false;
+}
+
+function showAnswer(){
+
+    card.innerHTML =
+    `
+    <div class="kana">${currentWord[1]}</div>
+    <div class="meaning">${currentWord[2]}</div>
+    `;
+
+    showingAnswer = true;
+}
+
+card.addEventListener("click",()=>{
+
+    if(showingAnswer){
+        showQuestion();
+    }
+    else{
+        showAnswer();
+    }
+
+});
+
+</script>
+
 </body>
 </html>
