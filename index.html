@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>일본어 형용사 암기</title>
+<title>일본어 암기</title>
 
 <style>
 body{
@@ -12,6 +12,7 @@ body{
     background:#f2f2f2;
 }
 
+/* 화면 */
 .screen{
     display:none;
     height:100vh;
@@ -19,22 +20,21 @@ body{
     align-items:center;
     flex-direction:column;
 }
+.active{ display:flex; }
 
-.active{
-    display:flex;
-}
-
+/* 메뉴 버튼 */
 .menu-btn{
     width:260px;
     padding:18px;
     margin:10px;
-    font-size:22px;
+    font-size:20px;
     border:none;
     border-radius:15px;
     background:white;
     box-shadow:0 4px 10px rgba(0,0,0,.15);
 }
 
+/* 카드 */
 #card{
     width:320px;
     height:220px;
@@ -50,182 +50,179 @@ body{
     padding:20px;
 }
 
-.question{
-    font-size:68px;
-    font-weight:bold;
-}
+.question{ font-size:68px; font-weight:bold; }
+.kana{ font-size:32px; color:#1976d2; font-weight:bold; }
+.meaning{ font-size:22px; margin-top:10px; }
 
-.kana{
-    font-size:34px;
-    color:#1976d2;
-    font-weight:bold;
-}
-
-.meaning{
-    font-size:24px;
-    margin-top:12px;
-}
-
+/* 뒤로 버튼 */
 .back-btn{
     position:fixed;
     top:20px;
     left:20px;
     border:none;
     border-radius:10px;
-    padding:10px 16px;
-    font-size:16px;
+    padding:10px 14px;
+    font-size:14px;
+    background:white;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);
 }
 </style>
 </head>
 
 <body>
 
+<!-- 메인 메뉴 -->
 <div id="menu" class="screen active">
-    <h1>📚 일본어 형용사 암기</h1>
+    <h2>📚 일본어 암기</h2>
 
-    <button class="menu-btn" onclick="startMode('i')">
-        이형용사 연습
-    </button>
+    <button class="menu-btn" onclick="startMode('i')">이형용사 연습</button>
+    <button class="menu-btn" onclick="startMode('na')">나형용사 연습</button>
+    <button class="menu-btn" onclick="startMode('adj')">형용사 전체</button>
 
-    <button class="menu-btn" onclick="startMode('na')">
-        나형용사 연습
-    </button>
+    <button class="menu-btn" onclick="showVerbMenu()">동사 연습</button>
 
-    <button class="menu-btn" onclick="startMode('all')">
-        모두 연습
-    </button>
+    <button class="menu-btn" onclick="startMode('all')">전체 연습</button>
 </div>
 
+<!-- 동사 메뉴 -->
+<div id="verbMenu" class="screen">
+    <h2>📚 동사 연습</h2>
+
+    <button class="menu-btn" onclick="startMode('verb1')">1류 동사</button>
+    <button class="menu-btn" onclick="startMode('verb23')">2·3류 동사</button>
+    <button class="menu-btn" onclick="startMode('verball')">동사 전체</button>
+
+    <button class="menu-btn" onclick="backMenu()">← 메인 메뉴</button>
+</div>
+
+<!-- 학습 화면 -->
 <div id="study" class="screen">
-    <button class="back-btn" onclick="goMenu()">← 메뉴</button>
+    <button class="back-btn" onclick="backMenu()">← 메뉴</button>
     <div id="card"></div>
 </div>
 
 <script>
 
+/* ======================
+   데이터
+====================== */
+
 const iWords = [
-
-["大","おおきい","크다"],
-["小","ちいさい","작다"],
-["高","たかい","높다, 비싸다"],
-["低","ひくい","낮다"],
-["安","やすい","싸다"],
-["新","あたらしい","새롭다"],
-["古","ふるい","오래되다, 낡다"],
-["悪","わるい","나쁘다, 미안하다"],
-["難","むずかしい","어렵다"],
-["遠","とおい","멀다"],
-["近","ちかい","가깝다"],
-["長","ながい","길다"],
-["短","みじかい","짧다"],
-["熱","あつい","뜨겁다"],
-["冷","つめたい","차갑다"],
-["厚","あつい","두껍다"],
-["暑","あつい","덥다"],
-["寒","さむい","춥다"],
-["明","あかるい","밝다"],
-["暗","くらい","어둡다"],
-["多","おおい","많다"],
-["少","すくない","적다"],
-["遅","おそい","늦다, 느리다"],
-["早","はやい","이르다"],
-["速","はやい","빠르다"],
-["重","おもい","무겁다"],
-["軽","かるい","가볍다"],
-["広","ひろい","넓다"],
-["強","つよい","강하다"],
-["弱","よわい","약하다"]
-
+["大","おおきい","크다"],["小","ちいさい","작다"],["高","たかい","높다, 비싸다"],
+["低","ひくい","낮다"],["安","やすい","싸다"],["新","あたらしい","새롭다"],
+["古","ふるい","오래되다"],["悪","わるい","나쁘다"],["難","むずかしい","어렵다"],
+["遠","とおい","멀다"],["近","ちかい","가깝다"],["長","ながい","길다"],
+["短","みじかい","짧다"],["熱","あつい","뜨겁다"],["冷","つめたい","차갑다"],
+["厚","あつい","두껍다"],["暑","あつい","덥다"],["寒","さむい","춥다"],
+["明","あかるい","밝다"],["暗","くらい","어둡다"],["多","おおい","많다"],
+["少","すくない","적다"],["遅","おそい","늦다, 느리다"],["早","はやい","이르다"],
+["速","はやい","빠르다"],["重","おもい","무겁다"],["軽","かるい","가볍다"],
+["広","ひろい","넓다"],["強","つよい","강하다"],["弱","よわい","약하다"]
 ];
 
 const naWords = [
-
-["元気","げんきだ","건강하다"],
-["有名","ゆうめいだ","유명하다"],
-["大丈夫","だいじょうぶだ","괜찮다"],
-["大切","たいせつだ","소중하다"],
-["上手","じょうずだ","잘하다, 능숙하다"],
-["下手","へただ","못하다, 서투르다"],
-["得意","とくいだ","잘하다, 자신있다"],
-["苦手","にがてだ","못하다, 자신없다"],
-["簡単","かんたんだ","간단하다"],
-["賑","にぎやかだ","번화하다, 복적이다"],
-["便利","べんりだ","편리하다"],
-["不便","ふべんだ","불편하다"],
-["十分","じゅうぶんだ","충분하다"],
-["大変","たいへんだ","힘들다, 큰일이다"],
-["親切","しんせつだ","친절하다"],
-["同","おなじだ","같다"],
-["幸","しあわせだ","행복하다"]
-
+["元気","げんきだ","건강하다"],["有名","ゆうめいだ","유명하다"],["大丈夫","だいじょうぶだ","괜찮다"],
+["大切","たいせつだ","소중하다"],["上手","じょうずだ","잘하다"],["下手","へただ","못하다"],
+["得意","とくいだ","잘하다"],["苦手","にがてだ","못하다"],["簡単","かんたんだ","간단하다"],
+["賑やか","にぎやかだ","번화하다"],["便利","べんりだ","편리하다"],["不便","ふべんだ","불편하다"],
+["十分","じゅうぶんだ","충분하다"],["大変","たいへんだ","힘들다"],["親切","しんせつだ","친절하다"],
+["同じ","おなじだ","같다"],["幸せ","しあわせだ","행복하다"]
 ];
 
+/* 1류 동사 */
+const verb1 = [
+["行く","いく","가다"],["書く","かく","쓰다"],["聞く","きく","듣다"],
+["歩く","あるく","걷다"],["乗る","のる","타다"],["歌う","うたう","노래하다"],
+["使う","つかう","사용하다"],["買う","かう","사다"],["会う","あう","만나다"],
+["手伝う","てつだう","도와주다"],["習う","ならう","배우다"],["死ぬ","しぬ","죽다"],
+["飲む","のむ","마시다"],["読む","よむ","읽다"],["休む","やすむ","쉬다"],
+["泳ぐ","およぐ","수영하다"],["待つ","まつ","기다리다"],["登る","のぼる","오르다"],
+["話す","はなす","말하다"],["遊ぶ","あそぶ","놀다"],["分かる","わかる","알다"],
+["なる","なる","되다"],["作る","つくる","만들다"],["帰る","かえる","돌아가다"],
+["入る","はいる","들어가다"],["走る","はしる","달리다"],["知る","しる","알다"],
+["切る","きる","자르다"]
+];
+
+/* 2·3류 */
+const verb23 = [
+["起きる","おきる","일어나다"],["食べる","たべる","먹다"],["見る","みる","보다"],
+["借りる","かりる","빌리다"],["寝る","ねる","자다"],["覚える","おぼえる","외우다"],
+["降りる","おりる","내리다"],["出る","でる","나가다"],["教える","おしえる","가르치다"],
+["着る","きる","입다"],["入れる","いれる","넣다"],["答える","こたえる","대답하다"],
+["忘れる","わすれる","잊다"],["見える","みえる","보이다"],["変える","かえる","바꾸다"],
+["来る","くる","오다"],["する","する","하다"]
+];
+
+/* ======================
+   상태
+====================== */
+
 let currentSet = [];
-let currentWord;
+let currentWord = null;
 let showingAnswer = false;
 
 const card = document.getElementById("card");
 
-function startMode(mode){
+/* ======================
+   메뉴 이동
+====================== */
 
+function showVerbMenu(){
     document.getElementById("menu").classList.remove("active");
-    document.getElementById("study").classList.add("active");
-
-    if(mode==="i"){
-        currentSet = iWords;
-    }
-    else if(mode==="na"){
-        currentSet = naWords;
-    }
-    else{
-        currentSet = [...iWords, ...naWords];
-    }
-
-    showQuestion();
+    document.getElementById("verbMenu").classList.add("active");
 }
 
-function goMenu(){
-
+function backMenu(){
+    document.getElementById("verbMenu").classList.remove("active");
     document.getElementById("study").classList.remove("active");
     document.getElementById("menu").classList.add("active");
 }
 
+/* ======================
+   모드 선택
+====================== */
+
+function startMode(mode){
+
+    document.getElementById("menu").classList.remove("active");
+    document.getElementById("verbMenu").classList.remove("active");
+    document.getElementById("study").classList.add("active");
+
+    if(mode==="i") currentSet = iWords;
+    else if(mode==="na") currentSet = naWords;
+    else if(mode==="adj") currentSet = [...iWords,...naWords];
+    else if(mode==="verb1") currentSet = verb1;
+    else if(mode==="verb23") currentSet = verb23;
+    else if(mode==="verball") currentSet = [...verb1,...verb23];
+    else if(mode==="all") currentSet = [...iWords,...naWords,...verb1,...verb23];
+
+    showQuestion();
+}
+
+/* ======================
+   카드 로직
+====================== */
+
 function randomWord(){
-    return currentSet[
-        Math.floor(Math.random()*currentSet.length)
-    ];
+    return currentSet[Math.floor(Math.random()*currentSet.length)];
 }
 
 function showQuestion(){
-
     currentWord = randomWord();
-
-    card.innerHTML =
-    `<div class="question">${currentWord[0]}</div>`;
-
+    card.innerHTML = `<div class="question">${currentWord[0]}</div>`;
     showingAnswer = false;
 }
 
 function showAnswer(){
-
     card.innerHTML =
-    `
-    <div class="kana">${currentWord[1]}</div>
-    <div class="meaning">${currentWord[2]}</div>
-    `;
-
+    `<div class="kana">${currentWord[1]}</div>
+     <div class="meaning">${currentWord[2]}</div>`;
     showingAnswer = true;
 }
 
-card.addEventListener("click",()=>{
-
-    if(showingAnswer){
-        showQuestion();
-    }
-    else{
-        showAnswer();
-    }
-
+card.addEventListener("click", ()=>{
+    if(!currentWord) return;
+    showingAnswer ? showQuestion() : showAnswer();
 });
 
 </script>
